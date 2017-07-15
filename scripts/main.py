@@ -33,13 +33,12 @@ rootLogger.addHandler(consoleHandler)
 RANDOM_STATE = 2017
 
 
-# TODO: report what has been done, after do and report graph and DL!
+# TODO: report what has been done, after do and report graph!
 # TODO: add graph feature       5hr
 # TODO: put edit_distance, graph leak features in __notebook__raw 3hr
 # TODO: add LSI features
 
 #not in priority
-# TODO: add capital words       2hr
 # TODO: add time elapsed for training / feature computing 0.5hr
 
 
@@ -95,10 +94,10 @@ def get_or_compute_features(data, dfile, feature_list, df_type):
     compute_weights_count(data)
 
     feats_to_compute = set(feature_list) - set(list(df))
-    print("feats to compute:")
-    print(feats_to_compute)
+    rootLogger.info("feats to compute:")
+    rootLogger.info(feats_to_compute)
     for f in feats_to_compute:
-        print(str(f))
+        rootLogger.info(str(f))
         # Feature names are mapped to the functions' names, so it executes only those,
         # that are related to the feats_to_compute!
         df[f] = data.apply(globals()[f], axis=1, raw=True)
@@ -108,7 +107,7 @@ def get_or_compute_features(data, dfile, feature_list, df_type):
 
 @timeit
 def compute_weights_count(data):
-    print('computing weights_count')
+    rootLogger.info('computing weights_count')
     data['question1'] = data['question1'].map(lambda x: str(x).lower().split())
     data['question2'] = data['question2'].map(lambda x: str(x).lower().split())
 
@@ -122,7 +121,7 @@ def compute_weights_count(data):
 
 @timeit
 def compute_magic_dict():
-    print('magic dict')
+    rootLogger.info('magic dict')
     df_train = pd.read_csv('../newdata/train.csv')
     df_train = df_train.fillna(' ')
     df_test = pd.read_csv('../newdata/test.csv')
@@ -568,19 +567,20 @@ def up_down_sampling(X_tr, X_val, y_tr, y_val):
 # read data
 rootLogger.info('reading train')
 N_train = 10
-train = pd.read_csv('../newdata/train.csv',  converters={'question1':str,'question2':str}
-                   # ,nrows=N_train
-                   )
-train = train.fillna('empty')
 
-rootLogger.info('Train: ' + str(train.shape))
-
-# preprocessing
-train_duplicate = train.is_duplicate.values
 
 UP_DOWN_SAMPLING = False
 
 for p_type in PREPROCESSING:
+    train = pd.read_csv('../newdata/train.csv', converters={'question1': str, 'question2': str}
+                        # ,nrows=N_train
+                        )
+    train = train.fillna('empty')
+
+    rootLogger.info('Train: ' + str(train.shape))
+
+    # preprocessing
+    train_duplicate = train.is_duplicate.values
     rootLogger.info('Preprocessing: ' + str(p_type))
     # setting 1: questions text preprocessing type (stemming, spelling, no preprocessing).
     train = get_preprocessed_data(train, p_type)
@@ -645,9 +645,9 @@ for p_type in PREPROCESSING:
     rootLogger.info('Features AUC:')
     for f in set(list(train)):
         try:
-            print('AUC ' + str(f) + ': ', roc_auc_score(train_duplicate, train[str(f)].values))
+            rootLogger.info('AUC ' + str(f) + ': ', roc_auc_score(train_duplicate, train[str(f)].values))
         except Exception as e:
-            print('couldn"t compute auc for: ' + str(f))
+            rootLogger.info('couldn"t compute auc for: ' + str(f))
 
     # 5-fold CV
     # N_folds = 5
