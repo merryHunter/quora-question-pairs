@@ -1,11 +1,14 @@
 import pandas as pd
+from nltk.stem.snowball import SnowballStemmer
 
 PREPROCESSING = [
+    # 'spelling',
     'stemming',
-    'lemma',
-    'tokenization',
-    'spelling'
+    'NO',
+
 ]
+
+stemmer = SnowballStemmer("english")
 
 def get_preprocessed_data(data, P_type):
     """
@@ -14,15 +17,30 @@ def get_preprocessed_data(data, P_type):
     :param P_type: str, one of PREPROCESSING literal.
     :return: transformed dataset
     """
+    if P_type == 'stemming':
+        data['question1'] = data['question1'].map(stemming)
+        data['question2'] = data['question2'].map(stemming)
+    elif P_type == 'spelling':
+        pass
 
-    data = data.apply(stemming, axis=1)
+    return data
 
 
-
-def stemming(row):
+def stemming(s):
     """
-
-    :param row:
+    Snowball stemming.
+    :param s:
     :return:
     """
-    return row
+    try:
+        r = s.decode("utf-8")
+        r = stemmer.stem(r)
+        r = r.encode("ascii", "ignore")
+    except:
+        return s.encode("ascii", "ignore")
+    return r
+
+
+def spelling(s):
+    
+    return s
